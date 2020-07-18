@@ -78,6 +78,7 @@
                     <th>类别</th>
                     <th>质量类别</th>
                     <th>数量</th>
+					<th>体积</th>
                     <?php if($_SESSION['user']['user_type']==1||$_SESSION['user']['user_type']==4){ ?>
                     <th>装卸成本单价</th>
                     <th>装卸收入单价</th>
@@ -105,6 +106,7 @@
                         <?php echo $row["iss_quality"]; ?>
                     </td>
                     <td style="text-align:center"><?php echo $row["allcount"]; ?></td>
+					<td style="text-align:center"><?php echo $row["allcount"]*$row["prod_volume"]; ?></td>
                     <?php if($_SESSION['user']['user_type']==1||$_SESSION['user']['user_type']==4){ ?>
                     <td style="text-align:center"><?php echo $row["prod_price"]; ?></td>
                     <td style="text-align:center"><?php echo $row["prod_realprice"]; ?></td>

@@ -79,10 +79,10 @@ class OutstoreQueryAction extends AppAction{
 
         $list_count=$model->alias("a")->join("twms_outstore_main as b on osm_id=oss_mainid")->join('twms_store as c on sto_id=oss_store')->
             join('twms_product as d on oss_prod=prod_id')->where($map)->
-            field("sum(oss_count) as count,sum(oss_plancount) as plancount")->find();
+            field("sum(oss_count) as count,sum(oss_plancount) as plancount,sum(oss_count*prod_volume) as total_volume")->find();
         $this->assign("real_count",$list_count['count']);
         $this->assign("plan_count",$list_count['plancount']);
-
+		$this->assign("total_volume",$list_count['total_volume']);
         $this->assign("searchBy",$_GET['searchBy']);
         $this->assign("keyword",$_GET['keyword']);
         $this->assign("list",$list);

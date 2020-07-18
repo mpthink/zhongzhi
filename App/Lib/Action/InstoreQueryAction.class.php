@@ -86,10 +86,11 @@ class InstoreQueryAction extends AppAction{
         //var_dump($model->getLastSql());
         $list_count=$model->alias('a')->join("twms_instore_main as b on ism_id=iss_mainid")->join('twms_store as c on sto_id=iss_store')->
             join('twms_product as d on iss_prod=prod_id')->where($map)->
-            field("sum(iss_count) as count,sum(iss_plancount) as plancount")->find();
+            field("sum(iss_count) as count,sum(iss_plancount) as plancount, sum(iss_count*prod_volume) as total_volume")->find();
         //var_dump($list_count['count']);
         $this->assign("real_count",$list_count['count']);
         $this->assign("plan_count",$list_count['plancount']);
+		$this->assign("total_volume",$list_count['total_volume']);
         $this->assign("searchBy",$_GET['searchBy']);
         $this->assign("keyword",$_GET['keyword']);
         $this->assign("list",$list);

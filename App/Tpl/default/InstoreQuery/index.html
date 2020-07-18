@@ -138,7 +138,7 @@
             <td align="center"><?php echo $row["iss_prodname"]; ?></td>
             <td align="center"><?php echo $row["iss_plancount"]; ?></td>
             <td align="center"><?php echo $row["iss_count"]; ?></td>
-            <td align="center"><?php if($row["prod_volume"]!=0.00) echo $row["prod_volume"]; ?></td>
+            <td align="center"><?php if($row["prod_volume"]!=0.00) echo $row["prod_volume"]*$row["iss_count"]; ?></td>
             <!-- <td align="center"><?php echo $row["count"]; ?></td>  -->
             <!--  <td align="center"><?php echo $row["total"]; ?></td>   -->
              <td align="center"><?php echo $row["ism_sellerunit"]; ?></td>
@@ -174,7 +174,8 @@
               <td align="center">合计：</td>
               <td align="center"><?php echo $real_count; ?></td>
               <td align="center"><?php echo $plan_count; ?></td>
-              <td colspan="10"></td>
+			  <td colspan="2" align="center">体积: <?php echo $total_volume; ?></td>
+              <td colspan="8"></td>
           </tr>
         <tr class="nobg">
           <td colspan="15" align="center"><?php echo $page; ?></td>
