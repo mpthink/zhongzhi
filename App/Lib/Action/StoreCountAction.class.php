@@ -33,15 +33,21 @@ class StoreCountAction extends AppAction{
                 WHERE d.osm_status >0
                 GROUP BY oss_prod, oss_quality )  as b on  a.iss_prod =  b.oss_prod  and a.iss_quality  = b.oss_quality order by allcount desc limit {$firstRow},{$listRows} ";
         $list = $Model_count->query($countsql);
-        $incount_sql = "select sum(iss_count) as incount from twms_instore_sub a  LEFT JOIN twms_instore_main as d on iss_mainid=ism_id WHERE d.ism_status>0";
+        $incount_sql = "select sum(iss_count) as incount, sum(iss_count*prod_volume) as in_volume from twms_instore_sub a  LEFT JOIN twms_instore_main as d on iss_mainid=ism_id LEFT JOIN twms_product as c on iss_prod=prod_id WHERE d.ism_status>0";
         $list_incount = $Model_count->query($incount_sql);
-        $outcount_sql = "select sum(oss_count) as outcount from twms_outstore_sub LEFT JOIN twms_outstore_main AS d ON oss_mainid = osm_id WHERE d.osm_status >0";
+        $outcount_sql = "select sum(oss_count) as outcount, sum(oss_count*prod_volume) as out_volume from twms_outstore_sub LEFT JOIN twms_outstore_main AS d ON oss_mainid = osm_id LEFT JOIN twms_product  as c on oss_prod=prod_id WHERE d.osm_status >0";
         $list_outcount = $Model_count->query($outcount_sql);
         //var_dump($list_incount[0]['incount']);
         //var_dump($list_outcount[0]['outcount']);
         //var_dump($Model_count->getLastSql());
         $count = $list_incount[0]['incount'] - $list_outcount[0]['outcount'];
+		$total_volume = $list_incount[0]['in_volume'] - $list_outcount[0]['out_volume'];
+		
+		//var_dump($list_incount[0]['in_volume']);
+        //var_dump($list_outcount[0]['out_volume']);
+		
         $this->assign("count",$count);
+		$this->assign("total_volume",$total_volume);
         $this->assign("list",$list);
         $this->display();
     }
@@ -158,18 +164,19 @@ class StoreCountAction extends AppAction{
                 GROUP BY oss_prod, oss_quality )  as b on  a.iss_prod =  b.oss_prod  and a.iss_quality  = b.oss_quality  order by allcount desc limit {$firstRow},{$listRows} ";
         $list = $Model_count->query($countsql);
 
-        $incount_sql = "select sum(iss_count) as incount from twms_instore_sub a   LEFT JOIN twms_instore_main as d on iss_mainid=ism_id WHERE d.ism_status>0 {$query}";
+        $incount_sql = "select sum(iss_count) as incount,sum(iss_count*prod_volume) as in_volume from twms_instore_sub a   LEFT JOIN twms_instore_main as d on iss_mainid=ism_id LEFT JOIN twms_product as c on iss_prod=prod_id WHERE d.ism_status>0 {$query}";
         $list_incount = $Model_count->query($incount_sql);
-        $outcount_sql = "select sum(oss_count) as outcount from twms_outstore_sub LEFT JOIN twms_outstore_main AS d ON oss_mainid = osm_id WHERE d.osm_status >0 {$query_osm}";
+        $outcount_sql = "select sum(oss_count) as outcount,sum(oss_count*prod_volume) as out_volume from twms_outstore_sub LEFT JOIN twms_outstore_main AS d ON oss_mainid = osm_id LEFT JOIN twms_product  as c on oss_prod=prod_id WHERE d.osm_status >0 {$query_osm}";
         $list_outcount = $Model_count->query($outcount_sql);
         //var_dump($list_incount[0]['incount']);
         //var_dump($list_outcount[0]['outcount']);
         //var_dump($Model_count->getLastSql());
         $count = $list_incount[0]['incount'] - $list_outcount[0]['outcount'];
+		$total_volume = $list_incount[0]['in_volume'] - $list_outcount[0]['out_volume'];
         $this->assign("count",$count);
 
        //var_dump($countsql);
-        //$this->assign("test2",$test);
+        $this->assign("total_volume",$total_volume);
         $this->assign("list",$list);
         $this->display('index');
 
@@ -273,11 +280,12 @@ class StoreCountAction extends AppAction{
                 array('pdca_name','货物类别'),
                 array('iss_quality','质量类别'),
                 array('allcount','库存数量'),
+				 array('volume','体积'),
                 array('prod_unit','计价单位'),
                 array('prod_price','装卸成本单价'),
                 array('prod_realprice','装卸收入单价')
             );
-            $filed = 'ism_sellerunit,iss_prodname,pdca_name,iss_quality,(incount - ifnull(outcount,0)) as allcount,prod_unit,prod_price,prod_realprice';
+            $filed = 'ism_sellerunit,iss_prodname,pdca_name,iss_quality,(incount - ifnull(outcount,0)) as allcount,(incount - ifnull(outcount,0))*prod_volume as volume,prod_unit,prod_price,prod_realprice';
         }else{
             $xlsCell  = array(
                 array('ism_sellerunit','客户单位'),
@@ -285,9 +293,10 @@ class StoreCountAction extends AppAction{
                 array('pdca_name','货物类别'),
                 array('iss_quality','质量类别'),
                 array('allcount','库存数量'),
+				 array('volume','体积'),
                 array('prod_unit','计价单位')
             );
-            $filed = 'ism_sellerunit,iss_prodname,pdca_name,iss_quality,(incount - ifnull(outcount,0)) as allcount,prod_unit';
+            $filed = 'ism_sellerunit,iss_prodname,pdca_name,iss_quality,(incount - ifnull(outcount,0)) as allcount,(incount - ifnull(outcount,0))*prod_volume as volume,prod_unit';
         }
 
         $Model_count = new Model();
